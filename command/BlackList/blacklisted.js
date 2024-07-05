@@ -3,7 +3,7 @@ const config = require('../../me-config.json');
 const { MessageEmbed } = require("discord.js");
 
 module.exports = {
-    name: "list-blacklist",
+    name: "blacklisted",
     category: "Security",
     description: "Displays the list of blacklisted members.",
     run: async (client, message, args, PREFIX) => {
@@ -12,7 +12,10 @@ module.exports = {
             const users = data.map(d => `<@!${d.UserID}>`);
 
             if (users.length === 0) {
-                return message.reply("**No blacklisted users found.**");
+                const embed = new MessageEmbed()
+                    .setDescription("**No blacklisted users found.**")
+                    .setColor("#002a7b");
+                return message.reply({ embeds: [embed] });
             }
 
             const embed = new MessageEmbed()
@@ -21,12 +24,15 @@ module.exports = {
                 .setFooter(message.guild.name, message.guild.iconURL())
                 .setThumbnail(message.guild.iconURL())
                 .addField("**Blacklisted**", `* ${users.join(`\n *`)}`)
-                .setColor("GREEN");
+                .setColor("#002a7b");
 
-            message.channel.send({ embed });
+            message.channel.send({ embeds: [embed] });
         } catch (error) {
             console.error('Error fetching blacklisted users:', error);
-            message.reply("**An error occurred while retrieving the blacklist.**");
+            const embed = new MessageEmbed()
+                .setDescription("**An error occurred while retrieving the blacklist.**")
+                .setColor("#002a7b");
+            message.reply({ embeds: [embed] });
         }
     }
 };
