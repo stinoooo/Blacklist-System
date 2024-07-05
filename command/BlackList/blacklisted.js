@@ -1,6 +1,3 @@
-Here's the improved and professional version for BUK:
-
-```javascript
 const blacklist = require('../../me-modals/blacklist/blacklisted');
 const config = require('../../me-config.json');
 const { MessageEmbed } = require("discord.js");
@@ -33,10 +30,3 @@ module.exports = {
         }
     }
 };
-```
-
-Key improvements:
-1. Clear and professional description and comments.
-2. Improved error handling and logging.
-3. More concise and readable code.
-4. Removed Arabic comments to maintain consistency.
