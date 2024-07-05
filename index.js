@@ -1,42 +1,53 @@
-const Discord = require("discord.js");
-const discord = require("discord.js");
-const kingman = require("./alive/keep_work.js")
-const { MessageEmbed, Collection, Client } = require("discord.js");
-const client = new Client()
-client.commands = new discord.Collection();
-client.eventss = new discord.Collection();
-client.aliases = new discord.Collection();
+const { Client, MessageEmbed, Collection } = require("discord.js");
+const kingman = require("./alive/keep_work.js");
 const fs = require('fs');
-kingman();
 const colors = require("colors");
-const TOKEN_BOT = process.env['ME_TOKEN']
 const config = require('./me-config.json');
-const PREFIX = config.prefix
+
+const client = new Client();
+client.commands = new Collection();
+client.eventss = new Collection();
+client.aliases = new Collection();
+
+kingman();
+
+const TOKEN_BOT = process.env['ME_TOKEN'];
+const PREFIX = config.prefix;
+
 client.on("error", console.error);
+
 ["command", "events"].forEach(p => {
   require(`./me-handler/${p}`)(client);
 });
-client.on('message', kmsg => {
+
+client.on('message', message => {
+  if (message.author.bot) return;
+
+  if (!message.guild) {
+    const embed = new MessageEmbed()
+      .setDescription("This only works on servers, not in direct messages.")
+      .setColor("#002a7b");
+    return message.reply({ embeds: [embed] });
+  }
+
   const pmention = new RegExp(`^<@!?${client.user.id}>( |)$`);
-  if (kmsg.content.match(pmention)) {
-    return kmsg.reply(`**MY PREFIX IS: ${PREFIX}**`)
+  if (message.content.match(pmention)) {
+    const embed = new MessageEmbed()
+      .setDescription(`**MY PREFIX IS: ${PREFIX}**`)
+      .setColor("#002a7b");
+    return message.reply({ embeds: [embed] });
   }
-  if (kmsg.author.bot) return;
-  if (!kmsg.guild) {
-    return kmsg.reply("This only works on servers, not in direct messages.")
+
+  if (!message.content.startsWith(PREFIX)) return;
+
+  const args = message.content.slice(PREFIX.length).trim().split(/ +/g);
+  const commandName = args.shift().toLowerCase();
+  if (!commandName.length) return;
+
+  let command = client.commands.get(commandName) || client.commands.get(client.aliases.get(commandName));
+  if (command) {
+    command.run(client, message, args, PREFIX);
   }
-  let prefix = PREFIX;
-  const args1 = kmsg.content.slice(prefix.length).split(/ +/);
-  if (!kmsg.content.startsWith(PREFIX)) return;
-  const args = kmsg.content
-    .slice(PREFIX.length)
-    .trim() 
-    .split(/ +/g); 
-  const kmcommand = args.shift().toLowerCase();
-  if (kmcommand.length === 0) return;
-  let kmcode = client.commands.get(kmcommand);
-  if (!kmcode) kmcode = client.commands.get(client.aliases.get(kmcommand));
-  if (kmcode) kmcode.run(client, kmsg, args, PREFIX, prefix);
 });
 
-client.login(TOKEN_BOT)
+client.login(TOKEN_BOT);
