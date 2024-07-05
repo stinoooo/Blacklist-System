@@ -1,102 +1,76 @@
-/*
-             ________________________________________________
-            /                                                \
-           |    _________________________________________     |
-           |   |                                         |    |
-           |   |  KMCODES BlackList System By KINGMAN    |    |
-           |   |                                         |    |
-           |   |       Devloper ["Muhammad Kurkar"]      |    |
-           |   |                                         |    |
-           |   |      Phone Number ["+962792914245"]     |    |
-           |   |                                         |    |
-           |   |      All rights reserved to KIGNAMN     |    |
-           |   |                                         |    |
-           |   |  If there is any error, just visit the  |    |
-           |   |                                         |    |
-           |   |        KINGMANDEV Discord Server        |    |
-           |   |                                         |    |
-           |   |_________________________________________|    |
-           |                                                  |
-            \_________________________________________________/
-                   \___________________________________/
-                ___________________________________________
-             _-'    .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.  --- `-_
-          _-'.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.--.  .-.-.`-_
-       _-'.-.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-`__`. .-.-.-.`-_
-    _-'.-.-.-.-. .-----.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-----. .-.-.-.-.`-_
- _-'.-.-.-.-.-. .---.-. .-------------------------. .-.---. .---.-.-.-.`-_
-:-------------------------------------------------------------------------:
-`---._.-------------------------------------------------------------._.---'
-*/
-const bl = require('../../me-modals/blacklist/blacklisted')
-const me = require('../../me-config.json')
-const devs = me.dev
+const blacklist = require('../../me-modals/blacklist/blacklisted');
+const config = require('../../me-config.json');
+const administrationTeam = config.dev;
 const { MessageEmbed } = require("discord.js");
- module.exports = {
-   name: "blacklist",
-   category: "Security",
-   description: "\`لاضافة عضوا الى قائمى البلاكليست\`",
-   run: async (client, kmsg, args, PREFIX) => {
-    if (!devs.includes(kmsg.author.id)) {
-        return kmsg.reply(`
-> **\⛔ Failed to execute Command ** 
-> **Reason:This Command is only for the bot Owners  **
+
+module.exports = {
+    name: "blacklist",
+    category: "Security",
+    description: "Adds a user to the blacklist.",
+    run: async (client, message, args, PREFIX) => {
+        if (!administrationTeam.includes(message.author.id)) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: This command is restricted to the BUK Administration Team.**
+            `);
+        }
+
+        const target = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
+        if (!target) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: No target specified.**
+            `);
+        }
+
+        const reason = args.slice(1).join(" ");
+        if (!reason) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: No blacklist reason provided.**
+            `);
+        }
+
+        if (administrationTeam.includes(target.id)) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: Cannot use this command on a member of the BUK Administration Team.**
+            `);
+        }
+
+        let existingData = await blacklist.findOne({ UserID: target.id });
+        if (existingData) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: This user is already blacklisted.**
+            `);
+        }
+
+        if (!existingData) {
+            const newData = new blacklist({
+                UserID: target.id,
+                Reason: reason,
+                Time: Date.now(),
+            });
+            await newData.save().catch(e => console.error('Error saving blacklist data:', e));
+        }
+
+        const userData = await blacklist.findOne({ UserID: target.id });
+
+        client.guilds.cache.forEach(async guild => {
+            try {
+                const member = guild.members.cache.get(userData.UserID);
+                if (member) {
+                    await member.ban({ reason: userData.Reason }).catch(e => console.error('Error banning user:', e));
+                }
+            } catch (e) {
+                console.error('Error processing guild member ban:', e);
+            }
+        });
+
+        message.channel.send(`
+> **🌐 ${target} has been added to the blacklist.**
+> **Reason: ${reason}**
         `);
     }
-    let target = kmsg.mentions.members.first() || kmsg.guild.members.cache.get(args[0])
-    if(!target) {
-      return kmsg.reply(`
-> **\⛔ Failed to execute Command ** 
-> ** **
-`)
-
-    }
-    let reason = args[1]
-    if(!reason){
-        return kmsg.reply(`
-> **\⛔ Failed to execute Command ** 
-> **Reason:  Where is the Blacklist Reason **
-        `)
-    }
-    if(devs.includes(target.id)){
-        return kmsg.reply(`
-> **\⛔ Failed to execute Command ** >
-> **Reason:  You cannot use this command on a bot Owners**
-        `)
-    }
-    let DATA = await bl.findOne({
-        UserID: target.id
-    })
-    if(DATA) {
-        return kmsg.reply(`
-> **\⛔ Failed to execute Command ** 
-> **Reason:  This person is already on the Blacklist**
-        `)
-    }
-    if(!DATA){
-        DATA = await bl.create({
-            UserID: target.id,
-            Reason: reason,
-            Time: Date.now(),
-        })
-        DATA.save().catch(e => console.log(e));
-    }
-    let user = await bl.findOne({
-        UserID: target.id
-    })
-    let me = client.guilds.cache.map(async g=>{
-      try {
-        g.members.cache.get(user.UserID).ban({ reason: user.Reason }).catch(e);
-      } catch(e) {
-        console.log(` `)
-      }
-        
-    })
-    kmsg.channel.send(`
-    > **🌐 ${target} This person has been added to the blacklist **
-    > **Reason: ${reason} **
-    `)
-
-
-    }
- }
+};
