@@ -1,6 +1,12 @@
 {
-    "__Congig__": "__Prefix__",
-    "prefix": ".",
-    "___Devlopers_": "__The person__id__who__can__use__the__commands__",
-    "dev": ["774303876060676136","","","","","","","","",""]
+    "config": {
+        "prefix": ".",
+        "developers": {
+            "description": "The IDs of users who can use the commands",
+            "ids": [
+                "186117507554344960",
+                "774303876060676136"
+            ]
+        }
+    }
 }
