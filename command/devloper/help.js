@@ -1,25 +1,24 @@
-const bl = require('../../me-modals/blacklist/blacklisted')
-const me = require('../../me-config.json')
-const devs = me.dev
 const { MessageEmbed } = require("discord.js");
- module.exports = {
-   name: "help",
-   category: "devlopers",
-   description: "\`لعرض قائمة الاواومر\`",
-   run: async (client, kmsg, args, PREFIX) => {
-    let commands = kmsg.client.commands.array();
-    let EMBED = new MessageEmbed()
-    .setTitle(`KINGMANDEV BlackList System`)
-    .setDescription(`**[HelpMenu](https://github.com/KMKINGMAN)**`)
-    .setColor("GOLD");
-    commands.forEach((cmd) => {
-        EMBED.addField(
-          `**${PREFIX}${cmd.name} ${cmd.aliases ? `(${cmd.aliases})` : ""}**`,
-          `${cmd.description}`,
-          false
-        );
-      });
-    kmsg.channel.send(EMBED)
-     
-} 
-}
+
+module.exports = {
+    name: "help",
+    category: "Developers",
+    description: "Displays a list of available commands.",
+    run: async (client, message, args, PREFIX) => {
+        const commands = client.commands.array();
+        const embed = new MessageEmbed()
+            .setTitle("BUK Blacklist System - Help Menu")
+            .setDescription("**[Help Menu](https://github.com/KMKINGMAN)**")
+            .setColor("#002a7b");
+
+        commands.forEach((cmd) => {
+            embed.addField(
+                `**${PREFIX}${cmd.name} ${cmd.aliases ? `(${cmd.aliases.join(", ")})` : ""}**`,
+                `${cmd.description}`,
+                false
+            );
+        });
+
+        message.channel.send(embed);
+    }
+};
