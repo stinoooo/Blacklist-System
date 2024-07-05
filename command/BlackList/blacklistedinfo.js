@@ -1,67 +1,36 @@
-/*
-             ________________________________________________
-            /                                                \
-           |    _________________________________________     |
-           |   |                                         |    |
-           |   |  KMCODES BlackList System By KINGMAN    |    |
-           |   |                                         |    |
-           |   |       Devloper ["Muhammad Kurkar"]      |    |
-           |   |                                         |    |
-           |   |      Phone Number ["+962792914245"]     |    |
-           |   |                                         |    |
-           |   |      All rights reserved to KIGNAMN     |    |
-           |   |                                         |    |
-           |   |  If there is any error, just visit the  |    |
-           |   |                                         |    |
-           |   |        KINGMANDEV Discord Server        |    |
-           |   |                                         |    |
-           |   |_________________________________________|    |
-           |                                                  |
-            \_________________________________________________/
-                   \___________________________________/
-                ___________________________________________
-             _-'    .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.  --- `-_
-          _-'.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.--.  .-.-.`-_
-       _-'.-.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-`__`. .-.-.-.`-_
-    _-'.-.-.-.-. .-----.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-----. .-.-.-.-.`-_
- _-'.-.-.-.-.-. .---.-. .-------------------------. .-.---. .---.-.-.-.`-_
-:-------------------------------------------------------------------------:
-`---._.-------------------------------------------------------------._.---'
-*/
-const bl = require('../../me-modals/blacklist/blacklisted')
-const me = require('../../me-config.json')
-const devs = me.dev
+const blacklist = require('../../me-modals/blacklist/blacklisted');
 const { MessageEmbed } = require("discord.js");
- module.exports = {
-   name: "bl-info",
-   category: "Security",
-   description: "\`لعرض المعلومات عن الشخص في القائمة البلاكليست\`",
-   run: async (client, kmsg, args, PREFIX) => {
-       if(!args[0]) {
-           return kmsg.reply(`
-           > **\⛔ Failed to execute Command ** 
-           > **Reason: You must enter the ID **
-           `)
-       }
-    let DATA = await bl.findOne({UserID: args[0]})
-    if(!DATA) {
-        return kmsg.reply(`
-        > **\⛔ Failed to execute Command ** 
-        > **Reason: This person is not on the list **
-        `)
+
+module.exports = {
+    name: "bl-info",
+    category: "Security",
+    description: "Displays information about a blacklisted user.",
+    run: async (client, message, args, PREFIX) => {
+        if (!args[0]) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: You must provide the user ID.**
+            `);
+        }
+
+        const data = await blacklist.findOne({ UserID: args[0] });
+        if (!data) {
+            return message.reply(`
+> **⛔ Command Execution Failed** 
+> **Reason: This user is not on the blacklist.**
+            `);
+        }
+
+        const infoEmbed = new MessageEmbed()
+            .setTitle(`Blacklisted User Info`)
+            .setDescription(`Details of the blacklisted user.`)
+            .setColor("GREEN")
+            .addFields(
+                { name: '**ID**', value: data.UserID, inline: false },
+                { name: '**Reason**', value: data.Reason, inline: false },
+                { name: '**Time**', value: data.Time.toISOString().split('T')[0], inline: false },
+            );
+
+        message.channel.send(infoEmbed);
     }
-    let info = new MessageEmbed()
-    .setTitle(`INFO`)
-    .setDescription(`This is Blacklisted User Info`)
-    .setColor("GREEN")
-    .addFields(
-        { name: '**ID**', value: DATA.UserID, inline: false },
-        { name: '**Reason**', value: DATA.Reason, inline: false },
-        { name: '**Time**', value: DATA.Time.toISOString().split('T')[0], inline: false },
-       )
-    kmsg.channel.send(info)
-
-
-
-    }
- }
+};
