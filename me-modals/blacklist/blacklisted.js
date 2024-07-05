@@ -1,16 +1,18 @@
-
 const { Schema, model } = require('mongoose');
-const blacklist = new Schema({
-    UserID: {
+
+const blacklistSchema = new Schema({
+    userID: {
         type: String,
-        require: true,
+        required: true,
     },
-    Reason : {
+    reason: {
         type: String,
+        default: 'No reason provided',
     },
-    Time:{
-        type : Date,
-        default: Date.now(),
+    time: {
+        type: Date,
+        default: Date.now,
     }
 });
-module.exports = model("BlackListed Members", blacklist);
+
+module.exports = model("BlacklistedMember", blacklistSchema);
