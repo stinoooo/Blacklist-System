@@ -1,40 +1,15 @@
-/*
-             ________________________________________________
-            /                                                \
-           |    _________________________________________     |
-           |   |                                         |    |
-           |   |  KINGMAN BlackList System By KINGMAN    |    |
-           |   |                                         |    |
-           |   |       Devloper ["Muhammad Kurkar"]      |    |
-           |   |                                         |    |
-           |   |      Phone Number ["+962792914245"]     |    |
-           |   |                                         |    |
-           |   |      All rights reserved to KIGNAMN     |    |
-           |   |                                         |    |
-           |   |  If there is any error, just visit the  |    |
-           |   |                                         |    |
-           |   |      KINGMANDEV Discord Server          |    |
-           |   |                                         |    |
-           |   |_________________________________________|    |
-           |                                                  |
-            \_________________________________________________/
-                   \___________________________________/
-                ___________________________________________
-             _-'    .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.  --- `-_
-          _-'.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.--.  .-.-.`-_
-       _-'.-.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-`__`. .-.-.-.`-_
-    _-'.-.-.-.-. .-----.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-----. .-.-.-.-.`-_
- _-'.-.-.-.-.-. .---.-. .-------------------------. .-.---. .---.-.-.-.`-_
-:-------------------------------------------------------------------------:
-`---._.-------------------------------------------------------------._.---'
-*/
-const bl = require('../../me-modals/blacklist/blacklisted')
+const blacklist = require('../../me-modals/blacklist/blacklisted');
+
 module.exports = {
-	name: 'guildMemberAdd',
-async execute(client, member) {
-    let DATA = await bl.findOne({UserID: member.id})
-    if (DATA.UserID) {
-        member.ban({ reason: DATA.Reason }).catch(e);
+    name: 'guildMemberAdd',
+    async execute(client, member) {
+        try {
+            const data = await blacklist.findOne({ UserID: member.id });
+            if (data) {
+                await member.ban({ reason: data.Reason });
+            }
+        } catch (error) {
+            console.error('Error banning blacklisted member:', error);
+        }
     }
-	}
-}
+};
